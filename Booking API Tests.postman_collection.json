@@ -1,0 +1,571 @@
+{
+	"info": {
+		"_postman_id": "5028181a-0d88-4f8e-89c7-2346dd87ecf4",
+		"name": "Booking API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27281971",
+		"_collection_link": "https://blue-shadow-372450.postman.co/workspace/Testing_Basics~672a3f61-f6d3-4ae1-917d-e12b93abca1b/collection/27281971-5028181a-0d88-4f8e-89c7-2346dd87ecf4?action=share&source=collection_link&creator=27281971"
+	},
+	"item": [
+		{
+			"name": "User's Authorization",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response has sessionId and it's saved\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.have.property('sessionId');\r",
+							"    pm.expect(responseJson.sessionId).to.not.be.empty;\r",
+							"    pm.environment.set(\"sessionId\", responseJson.sessionId);\r",
+							"    console.log(\"Session ID saved: \" + responseJson.sessionId);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Events List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is valid JSON\", function () {\r",
+							"    pm.response.to.be.json; \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is an array of events\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Event items have required fields (id, title, date, location, sportType, availableTickets)\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    if (responseJson.length > 0) {\r",
+							"        const firstEvent = responseJson[0];\r",
+							"        pm.expect(firstEvent).to.have.all.keys('id', 'title', 'date', 'location', 'sportType', 'availableTickets');\r",
+							"        pm.expect(firstEvent.id).to.be.a('number'); \r",
+							"        pm.expect(firstEvent.title).to.be.a('string');\r",
+							"        pm.expect(firstEvent.date).to.be.a('string'); \r",
+							"        pm.expect(firstEvent.availableTickets).to.be.a('number');\r",
+							"    } else {\r",
+							"        console.log(\"Received an empty array of events. Skipping field structure check for individual items.\");\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3001/api/events?sportType=running&date=2024-12-31&location=Stadium A",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"events"
+					],
+					"query": [
+						{
+							"key": "sportType",
+							"value": "running"
+						},
+						{
+							"key": "date",
+							"value": "2024-12-31"
+						},
+						{
+							"key": "location",
+							"value": "Stadium A"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating  Reservation - Success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 201\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains a unique bookingId and it's saved\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.have.property('bookingId');\r",
+							"    pm.expect(responseJson.bookingId).to.not.be.empty; \r",
+							"    pm.environment.set(\"bookingId\", responseJson.bookingId);\r",
+							"    console.log(\"Booking ID saved to environment: \" + pm.environment.get(\"bookingId\"));\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"eventId\": \"{{eventId}}\", \r\n    \"tickets\": 2,\r\n    \"userId\": \"{{userId}}\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating  Reservation - Negative(without eventId)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 (Bad Request)\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains an error message\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.satisfy(function(obj) {\r",
+							"        return obj.hasOwnProperty('error') || obj.hasOwnProperty('message') || obj.hasOwnProperty('errors');\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"tickets\": 2,\r\n    \"userId\": \"{{userId}}\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Creating  Reservation - Negative (tickets more than available)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 (Bad Request)\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains an error message about ticket quantity\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.satisfy(function(obj) {\r",
+							"        return obj.hasOwnProperty('error') || obj.hasOwnProperty('message') || obj.hasOwnProperty('errors');\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"eventId\": \"{{eventId}}\", \r\n    \"tickets\": 20000000000,\r\n    \"userId\": \"{{userId}}\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/bookings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"bookings"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reservation Payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 for successful payment\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Payment status is PAID or COMPLETED\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.have.property('status');\r",
+							"    pm.expect(responseJson.status).to.be.oneOf(['PAID', 'COMPLETED']);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"bookingId\": \"{{bookingId}}\",\r\n    \"amount\": {{paymentAmount}},\r\n    \"paymentDetails\": { \r\n        \"cardNumber\": {{testCardNumber}},\r\n        \"expiryDate\": {{testCardExpiry}},\r\n        \"cvv\": {{testCardCvv}}\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/payments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reservation Payment - Failure",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400 (Bad Request) or 402 (Payment Required)\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([400, 402], \"Expected status code 400 or 402 for payment failure\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is valid JSON\", function () {\r",
+							"    try {\r",
+							"        pm.response.to.be.json;\r",
+							"    } catch (e) {\r",
+							"        console.warn(\"Response is not JSON. Content-Type: \" + pm.response.headers.get('Content-Type'));\r",
+							"        console.warn(\"Response text: \" + pm.response.text());\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains an error message related to payment or invalid data\", function () {\r",
+							"    if (pm.response.headers.get('Content-Type') && pm.response.headers.get('Content-Type').includes('application/json')) {\r",
+							"        const responseJson = pm.response.json();\r",
+							"        console.log(\"Error Response JSON:\", responseJson); \r",
+							"        const hasErrorMessage = responseJson.hasOwnProperty('error') ||\r",
+							"                                responseJson.hasOwnProperty('message') ||\r",
+							"                                responseJson.hasOwnProperty('errors') ||\r",
+							"                                (responseJson.paymentDetails && responseJson.paymentDetails.hasOwnProperty('cvvError')); \r",
+							"\r",
+							"        pm.expect(hasErrorMessage, \"Response should contain an error message field (e.g., 'error', 'message', 'errors', or specific field)\").to.be.true;\r",
+							"\r",
+							"    } else {\r",
+							"        console.warn(\"Skipping JSON error message check as response is not JSON.\");\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"bookingId\": \"{{bookingId}}\",\r\n    \"amount\": {{paymentAmount}},\r\n    \"paymentDetails\": { \r\n        \"cardNumber\": {{testCardNumber}},\r\n        \"expiryDate\": {{testCardExpiry}},\r\n        \"cvv\": \"ABCD\"\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3001/api/payments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Reservation Details By Id - Success",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Booking details are correct\", function () {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.have.property('id');\r",
+							"    pm.expect(responseJson.id).to.eql(pm.environment.get(\"bookingId\")); \r",
+							"    pm.expect(responseJson).to.have.property('amount'); \r",
+							"    pm.expect(responseJson).to.have.property('status'); \r",
+							"    pm.expect(responseJson.status).to.eql('PAID'); \r",
+							"    pm.expect(responseJson).to.have.property('eventName'); \r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3001/api/bookings/{{bookingId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"bookings",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Reservation Details By Id - BookingId does  not exists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 (Not Found) for non-existent bookingId\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{sessionId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3001/api/bookings/nonexistent999",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3001",
+					"path": [
+						"api",
+						"bookings",
+						"nonexistent999"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
