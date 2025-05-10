@@ -19,7 +19,7 @@ class Event(BaseModel):
     availableTickets: int
 
 class BookingCreate(BaseModel):
-    eventId: int
+    eventId: Optional[int] = None
     tickets: int = Field(..., gt=0)
     userId: Optional[str] = None
 
