@@ -1,4 +1,3 @@
-# app/routers/auth.py
 from fastapi import APIRouter, HTTPException, status, Depends
 from .. import models, crud # Относительные импорты из родительской папки app
 

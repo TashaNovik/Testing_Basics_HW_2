@@ -1,4 +1,3 @@
-# app/routers/bookings.py
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import Optional
 from .. import models, crud, dependencies, db  # db нужен для изменения availableTickets

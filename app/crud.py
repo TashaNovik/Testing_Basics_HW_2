@@ -1,4 +1,3 @@
-# app/crud.py
 import uuid
 from typing import List, Optional, Dict
 from . import models, db # Относительные импорты

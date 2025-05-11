@@ -1,4 +1,3 @@
-# app/routers/events.py
 from fastapi import APIRouter, Depends
 from typing import List, Optional
 from .. import models, crud, dependencies
