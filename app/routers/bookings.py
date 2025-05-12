@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from typing import Optional
-from .. import models, crud, dependencies, db  # db нужен для изменения availableTickets
+from .. import models, crud, dependencies, db
 
 router = APIRouter(
     tags=["bookings & payments"],
@@ -12,21 +11,16 @@ router = APIRouter(
 @router.post("/bookings", response_model=models.BookingResponse, status_code=status.HTTP_201_CREATED)
 async def create_new_booking_endpoint(
         booking_data: models.BookingCreate,
-        current_user_email: str = Depends(dependencies.get_current_user_email)  # Можно оставить, если нужна переменная
+        current_user_email: str = Depends(dependencies.get_current_user_email)
 ):
     event = crud.get_event_by_id(booking_data.eventId)
     if not event:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=f"Event with id {booking_data.eventId} not found")
-
     if event["availableTickets"] < booking_data.tickets:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Not enough tickets available for the selected event")
-
-    # Уменьшаем количество доступных билетов (упрощенно)
-    # Важно: это изменение состояния, в реальном приложении нужны транзакции/блокировки
     db.events_db[booking_data.eventId]["availableTickets"] -= booking_data.tickets
-
     created_booking = crud.create_booking(booking_in=booking_data, user_email=current_user_email)
     return created_booking
 

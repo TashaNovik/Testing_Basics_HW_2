@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from .. import models, crud # Относительные импорты из родительской папки app
+from fastapi import APIRouter, HTTPException, status
+from .. import models, crud
 
 router = APIRouter(
-    prefix="/auth", # Префикс для этого роутера, будет /api/auth/...
-    tags=["authentication"] # Теги для документации Swagger/OpenAPI
+    prefix="/auth",
+    tags=["authentication"]
 )
 
 @router.post("/login", response_model=models.LoginResponse, status_code=status.HTTP_200_OK)

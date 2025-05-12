@@ -1,7 +1,7 @@
 # app/dependencies.py
-from fastapi import HTTPException, Header, status, Depends
+from fastapi import HTTPException, Header, status
 from typing import Optional
-from .db import sessions_db, users_db # Используем относительный импорт
+from .db import sessions_db, users_db
 
 async def get_current_user_email(authorization: Optional[str] = Header(None)) -> str:
     if authorization is None or not authorization.startswith("Bearer "):
